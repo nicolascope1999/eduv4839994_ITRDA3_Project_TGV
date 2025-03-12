@@ -229,27 +229,35 @@ server <- function(input, output, session) {
           theme_minimal()
       })
       
-      # Render a table combining tool percentages with their breakdown by Study Field
       output[[paste0("list_", column_name)]] <- renderTable({
-        # Basic tool data with percentages
-        tool_data <- split_list() %>% 
-          rename(!!column_name := Tool) %>% 
-          select(!!sym(column_name), Percentage)
-        # Calculate percentages for each Study Field per tool
-        study_field_data <- data %>%
-          separate_rows(!!sym(column_name), sep = ";") %>%
-          group_by(!!sym(column_name), StudyField) %>%
-          summarise(Count = n(), .groups = "drop") %>%
-          group_by(!!sym(column_name)) %>%
-          mutate(Percentage_Field = (Count / sum(Count)) * 100) %>%
-          select(!!sym(column_name), StudyField, Percentage_Field) %>%
-          pivot_wider(names_from = StudyField, values_from = Percentage_Field, values_fill = 0)
-        # Merge the two split_lists and arrange by percentage
-        final_output <- tool_data %>% 
-          left_join(study_field_data, by = column_name) %>% 
-          arrange(desc(Percentage))
-        final_output
-      }, striped = TRUE, hover = TRUE, bordered = TRUE)
+  # Basic tool data with percentages
+  tool_data <- split_list() %>% 
+    rename(!!column_name := Tool) %>% 
+    select(!!sym(column_name), Percentage)
+  # Calculate percentages for each Study Field per tool
+  study_field_data <- data %>%
+    separate_rows(!!sym(column_name), sep = ";") %>%
+    group_by(!!sym(column_name), StudyField) %>%
+    summarise(Count = n(), .groups = "drop") %>%
+    group_by(!!sym(column_name)) %>%
+    mutate(Percentage_Field = round((Count / sum(Count)) * 100, 2)) %>%
+    select(!!sym(column_name), StudyField, Percentage_Field) %>%
+    pivot_wider(names_from = StudyField, values_from = Percentage_Field, values_fill = 0)
+  # Merge the two split_lists and arrange by percentage
+  final_output <- tool_data %>% 
+    left_join(study_field_data, by = column_name) %>% 
+    arrange(desc(Percentage))
+  # Create a descriptions row
+  desc <- rep("", ncol(final_output))
+  names(desc) <- names(final_output)
+  desc["Percentage"] <- "The percentage of respondents who reported using this tool or technology"
+  study_field_names <- setdiff(names(final_output), c(column_name, "Percentage"))
+  desc[study_field_names] <- "Percentage of respondents from this Study Field using this tool or technology"
+  # Add the descriptions row at the top
+  final_output <- rbind(desc, final_output)
+  final_output
+}, striped = TRUE, hover = TRUE, bordered = TRUE)
+
     })
   }
   

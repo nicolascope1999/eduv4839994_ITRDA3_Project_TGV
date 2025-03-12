@@ -39,6 +39,8 @@ These sections take a look at the most commonly used, and other usage patterns o
 - **Pie Chart**: Compares the **top technology vs. all others** to provide a quick insight into market/ industry dominance.
 - **Stacked Bar Chart**: Displays how graduates from different study fields have adopted the top tools and technologies.
 - **Table View**: An expansion of the stacked bar chart above, showing the full list of all tools and technologies used.
+    - **Percentage**: The percentage of all respondents who reported using the tool or technology.
+    - **Study Fields**: The distribution of each tool or technology amongst the three Study Fields.
 
 ### **How to Use:**
 
